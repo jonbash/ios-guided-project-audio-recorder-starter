@@ -53,6 +53,9 @@ class AudioRecorderController: UIViewController {
             return audioPlayer?.currentTime ?? 0
         }
     }
+    var duration: TimeInterval {
+        audioPlayer?.duration ?? 0
+    }
 
     @IBAction func playButtonPressed(_ sender: Any) {
         playPause()
@@ -124,6 +127,8 @@ class AudioRecorderController: UIViewController {
     }
 
     func record() {
+        audioPlayer = nil
+
         let docs = FileManager.default.urls(
             for: .documentDirectory,
             in: .userDomainMask)
@@ -144,12 +149,14 @@ class AudioRecorderController: UIViewController {
         audioRecorder?.delegate = self
         audioRecorder?.record()
         updateViews()
+        startTimer()
     }
 
     func stop() {
         audioRecorder?.stop()
         audioRecorder = nil
         updateViews()
+        cancelTimer()
     }
 
     func toggleRecord() {
@@ -160,12 +167,19 @@ class AudioRecorderController: UIViewController {
 
     private func updateViews() {
         playButton.setTitle(isPlaying ? "Pause" : "Play", for: .normal)
-        timeLabel.text = timeFormatter.string(from: elapsedTime)
+
+        if isRecording {
+            timeLabel.text = timeFormatter.string(from: elapsedTime)
+        } else {
+            timeLabel.text = timeFormatter.string(from: elapsedTime)
+        }
+
+        timeRemainingLabel.text = timeFormatter.string(from: duration)
+
         timeSlider.maximumValue = Float(audioPlayer?.duration ?? 0)
         timeSlider.value = Float(elapsedTime)
 
         recordButton.setTitle(isRecording ? "Stop" : "Record", for: .normal)
-
     }
 }
 
@@ -188,6 +202,7 @@ extension AudioRecorderController: AVAudioRecorderDelegate {
         print("finished recording")
         if flag, let url = recordURL {
             audioPlayer = try? AVAudioPlayer(contentsOf: url)
+            updateViews()
         }
     }
 
