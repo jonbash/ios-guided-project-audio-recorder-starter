@@ -7,9 +7,12 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioRecorderController: UIViewController {
-    
+
+    var audioPlayer: AVAudioPlayer?
+
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var timeLabel: UILabel!
@@ -29,17 +32,58 @@ class AudioRecorderController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+        timeLabel.font = UIFont.monospacedDigitSystemFont(
+            ofSize: timeLabel.font.pointSize,
+            weight: .regular)
+        timeRemainingLabel.font = UIFont.monospacedDigitSystemFont(
+            ofSize: timeRemainingLabel.font.pointSize,
+            weight: .regular)
 
-        timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeLabel.font.pointSize,
-                                                          weight: .regular)
-        timeRemainingLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeRemainingLabel.font.pointSize,
-                                                                   weight: .regular)
+        loadAudio()
 	}
 
+    // MARK: - Playback APIs
 
     @IBAction func playButtonPressed(_ sender: Any) {
-
+        playPause()
 	}
+
+    var isPlaying: Bool { audioPlayer?.isPlaying ?? false }
+
+    private func loadAudio() {
+        // piano.mp3
+        // app bundle - readonly
+        // documents - readwrite
+        guard let songURL = Bundle.main.url(
+            forResource: "piano",
+            withExtension: "mp3")
+            else {
+                print("no file!")
+                return
+        }
+        audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
+    }
+
+    private func play() {
+        audioPlayer?.play()
+    }
+
+    private func pause() {
+        audioPlayer?.pause()
+    }
+
+    private func playPause() {
+        isPlaying ? pause() : play()
+    }
+
+    // get audio file
+    // play
+    // pause
+    // stop
+    // is it playing?
+    // timestamp
+
+    // MARK: - Record APIs
     
     @IBAction func recordButtonPressed(_ sender: Any) {
     
