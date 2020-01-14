@@ -11,8 +11,6 @@ import AVFoundation
 
 class AudioRecorderController: UIViewController {
 
-    var audioPlayer: AVAudioPlayer?
-
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var playButton: UIButton!
     @IBOutlet weak var timeLabel: UILabel!
@@ -44,13 +42,17 @@ class AudioRecorderController: UIViewController {
 
     // MARK: - Playback APIs
 
+    private var audioPlayer: AVAudioPlayer?
+    private var playbackTimer: Timer?
+
+    var isPlaying: Bool { audioPlayer?.isPlaying ?? false }
+    var elapsedTime: TimeInterval { audioPlayer?.currentTime ?? 0 }
+
     @IBAction func playButtonPressed(_ sender: Any) {
         playPause()
 	}
 
-    var isPlaying: Bool { audioPlayer?.isPlaying ?? false }
-
-    private func loadAudio() {
+    func loadAudio() {
         // piano.mp3
         // app bundle - readonly
         // documents - readwrite
@@ -64,16 +66,42 @@ class AudioRecorderController: UIViewController {
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
     }
 
-    private func play() {
+    func play() {
         audioPlayer?.play()
+        updateViews()
+        startTimer()
     }
 
-    private func pause() {
+    func pause() {
         audioPlayer?.pause()
+        updateViews()
+        cancelTimer()
     }
 
-    private func playPause() {
+    func playPause() {
         isPlaying ? pause() : play()
+    }
+
+    // MARK: - Playback Private
+
+    private func startTimer() {
+        cancelTimer()
+        playbackTimer = Timer.scheduledTimer(
+            timeInterval: 0.03,
+            target: self,
+            selector: #selector(updateTimer(_:)),
+            userInfo: nil,
+            repeats: true)
+    }
+
+    @objc
+    private func updateTimer(_ timer: Timer) {
+        updateViews()
+    }
+
+    private func cancelTimer() {
+        playbackTimer?.invalidate()
+        playbackTimer = nil
     }
 
     // get audio file
@@ -87,6 +115,13 @@ class AudioRecorderController: UIViewController {
     
     @IBAction func recordButtonPressed(_ sender: Any) {
     
+    }
+
+    // MARK: - UI Update
+
+    private func updateViews() {
+        playButton.setTitle(isPlaying ? "Pause" : "Play", for: .normal)
+        timeLabel.text = timeFormatter.string(from: elapsedTime)!
     }
 }
 
