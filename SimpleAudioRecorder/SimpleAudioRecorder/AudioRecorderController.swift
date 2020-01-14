@@ -64,6 +64,8 @@ class AudioRecorderController: UIViewController {
                 return
         }
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
+        audioPlayer?.delegate = self
+        updateViews()
     }
 
     func play() {
@@ -104,13 +106,6 @@ class AudioRecorderController: UIViewController {
         playbackTimer = nil
     }
 
-    // get audio file
-    // play
-    // pause
-    // stop
-    // is it playing?
-    // timestamp
-
     // MARK: - Record APIs
     
     @IBAction func recordButtonPressed(_ sender: Any) {
@@ -127,3 +122,14 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+// MARK: - AVAudioPlayerDelegate
+
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        updateViews()
+    }
+
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error { print(error) }
+    }
+}
