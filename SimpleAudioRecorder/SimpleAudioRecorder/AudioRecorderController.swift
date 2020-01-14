@@ -121,7 +121,9 @@ class AudioRecorderController: UIViewController {
 
     private func updateViews() {
         playButton.setTitle(isPlaying ? "Pause" : "Play", for: .normal)
-        timeLabel.text = timeFormatter.string(from: elapsedTime)!
+        timeLabel.text = timeFormatter.string(from: elapsedTime)
+        timeSlider.maximumValue = Float(audioPlayer?.duration ?? 0)
+        timeSlider.value = Float(elapsedTime)
     }
 }
 
